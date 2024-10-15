@@ -15,7 +15,7 @@ resource "aws_cognito_identity_pool" "ccs_identity_pool" {
   allow_unauthenticated_identities = false
 
   cognito_identity_providers {
-    client_id   = aws_cognito_user_pool_client.ccs_user_pool_client.id
+    client_id     = aws_cognito_user_pool_client.ccs_user_pool_client.id
     provider_name = aws_cognito_user_pool.ccs_user_pool.endpoint
   }
 }
@@ -35,10 +35,10 @@ resource "aws_iam_role" "authenticated_role" {
         Action = "sts:AssumeRoleWithWebIdentity",
         Condition = {
           StringEquals = {
-            "cognito-identity.amazonaws.com:aud": aws_cognito_identity_pool.ccs_identity_pool.id
+            "cognito-identity.amazonaws.com:aud" : aws_cognito_identity_pool.ccs_identity_pool.id
           },
-          "ForAnyValue:StringLike": {
-            "cognito-identity.amazonaws.com:amr": "authenticated"
+          "ForAnyValue:StringLike" : {
+            "cognito-identity.amazonaws.com:amr" : "authenticated"
           }
         }
       }
@@ -46,31 +46,51 @@ resource "aws_iam_role" "authenticated_role" {
   })
 }
 
-# Policy that allows dynamic access based on permissions
 resource "aws_iam_role_policy" "authenticated_role_policy" {
   role = aws_iam_role.authenticated_role.id
 
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
+      # Allow all authenticated users to list the bucket
       {
         Effect = "Allow",
-        Action = [
-          "s3:ListBucket"
-        ],
+        Action = "s3:ListBucket",
         Resource = "arn:aws:s3:::ccs"
       },
+
+      # Allow Read-Only (GetObject) if the user has the "read" permission tag
       {
         Effect = "Allow",
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject"
-        ],
+        Action = "s3:GetObject",
         Resource = "arn:aws:s3:::ccs/*",
         Condition = {
           "StringEquals": {
-            "aws:RequestTag/Permission": "$${aws:username}"  # Permissions are checked dynamically
+            "aws:RequestTag/Permission": "read"  # Only allow if permission is "read"
+          }
+        }
+      },
+
+      # Allow Write (PutObject) if the user has the "write" permission tag
+      {
+        Effect = "Allow",
+        Action = "s3:PutObject",
+        Resource = "arn:aws:s3:::ccs/*",
+        Condition = {
+          "StringEquals": {
+            "aws:RequestTag/Permission": "write"  # Only allow if permission is "write"
+          }
+        }
+      },
+
+      # Allow Delete (DeleteObject) if the user has the "delete" permission tag
+      {
+        Effect = "Allow",
+        Action = "s3:DeleteObject",
+        Resource = "arn:aws:s3:::ccs/*",
+        Condition = {
+          "StringEquals": {
+            "aws:RequestTag/Permission": "delete"  # Only allow if permission is "delete"
           }
         }
       }

@@ -12,10 +12,10 @@ resource "aws_lambda_function" "permission_checker" {
   }
 }
 
-data "archive_file" "updateVisitors" {
+data "archive_file" "permission_checker" {
   type        = "zip"
-  source_file = "./aws/lambda/src/permission_checker.py"
-  output_path = "./aws/lambda/permission_checker.zip"
+  source_file = "./src/lambda/functions/permission_checker.py"
+  output_path = "./aws/lambda/functions/permission_checker.zip"
 }
 
 resource "aws_iam_role" "lambda_execution_role" {
