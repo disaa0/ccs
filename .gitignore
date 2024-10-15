@@ -1,6 +1,5 @@
-*credentials*
 *.zip
-.terraform.lock.hcl
+.terraform.lock.hcl*
 
 # Local .terraform directories
 **/.terraform/*
