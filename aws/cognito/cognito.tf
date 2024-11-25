@@ -56,14 +56,14 @@ resource "aws_iam_role_policy" "authenticated_role_policy" {
       {
         Effect = "Allow",
         Action = "s3:ListBucket",
-        Resource = "arn:aws:s3:::ccs"
+        Resource = "arn:aws:s3:::tul-ccs"
       },
 
       # Allow Read-Only (GetObject) if the user has the "read" permission tag
       {
         Effect = "Allow",
         Action = "s3:GetObject",
-        Resource = "arn:aws:s3:::ccs/*",
+        Resource = "arn:aws:s3:::tul-ccs/*",
         Condition = {
           "StringEquals": {
             "aws:RequestTag/Permission": "read"  # Only allow if permission is "read"
@@ -75,7 +75,7 @@ resource "aws_iam_role_policy" "authenticated_role_policy" {
       {
         Effect = "Allow",
         Action = "s3:PutObject",
-        Resource = "arn:aws:s3:::ccs/*",
+        Resource = "arn:aws:s3:::tul-ccs/*",
         Condition = {
           "StringEquals": {
             "aws:RequestTag/Permission": "write"  # Only allow if permission is "write"
@@ -87,7 +87,7 @@ resource "aws_iam_role_policy" "authenticated_role_policy" {
       {
         Effect = "Allow",
         Action = "s3:DeleteObject",
-        Resource = "arn:aws:s3:::ccs/*",
+        Resource = "arn:aws:s3:::tul-ccs/*",
         Condition = {
           "StringEquals": {
             "aws:RequestTag/Permission": "delete"  # Only allow if permission is "delete"
