@@ -1,6 +1,36 @@
 # Cognito User Pool
 resource "aws_cognito_user_pool" "ccs_user_pool" {
-  name = "ccs_user_pool"
+  name                     = "ccs_user_pool"
+  username_attributes      = ["email"]
+  auto_verified_attributes = ["email"]
+  # alias_attributes         = ["email"]
+
+  email_configuration {
+    email_sending_account = "COGNITO_DEFAULT"
+  }
+
+  schema {
+    name                = "email"
+    attribute_data_type = "String"
+    required            = true
+    mutable             = false
+  }
+
+  admin_create_user_config {
+    allow_admin_create_user_only = false #
+  }
+
+  verification_message_template {
+    default_email_option = "CONFIRM_WITH_CODE"
+  }
+
+  password_policy {
+    minimum_length    = 8
+    require_lowercase = true
+    require_numbers   = true
+    require_symbols   = true
+    require_uppercase = true
+  }
 }
 
 # Cognito User Pool Client
@@ -50,50 +80,28 @@ resource "aws_iam_role_policy" "authenticated_role_policy" {
   role = aws_iam_role.authenticated_role.id
 
   policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      # Allow all authenticated users to list the bucket
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        Effect = "Allow",
-        Action = "s3:ListBucket",
-        Resource = "arn:aws:s3:::tul-ccs"
+        "Action" : "s3:ListBucket",
+        "Effect" : "Allow",
+        "Resource" : "arn:aws:s3:::tul-ccs"
       },
-
-      # Allow Read-Only (GetObject) if the user has the "read" permission tag
-      {
-        Effect = "Allow",
-        Action = "s3:GetObject",
-        Resource = "arn:aws:s3:::tul-ccs/*",
-        Condition = {
-          "StringEquals": {
-            "aws:RequestTag/Permission": "read"  # Only allow if permission is "read"
-          }
-        }
-      },
-
-      # Allow Write (PutObject) if the user has the "write" permission tag
-      {
-        Effect = "Allow",
-        Action = "s3:PutObject",
-        Resource = "arn:aws:s3:::tul-ccs/*",
-        Condition = {
-          "StringEquals": {
-            "aws:RequestTag/Permission": "write"  # Only allow if permission is "write"
-          }
-        }
-      },
-
-      # Allow Delete (DeleteObject) if the user has the "delete" permission tag
-      {
-        Effect = "Allow",
-        Action = "s3:DeleteObject",
-        Resource = "arn:aws:s3:::tul-ccs/*",
-        Condition = {
-          "StringEquals": {
-            "aws:RequestTag/Permission": "delete"  # Only allow if permission is "delete"
-          }
-        }
-      }
+      # {
+      # 	"Action": "s3:GetObject",
+      # 	"Effect": "Allow",
+      # 	"Resource": "arn:aws:s3:::tul-ccs/*"
+      # },
+      # {
+      # 	"Action": "s3:PutObject",
+      # 	"Effect": "Allow",
+      # 	"Resource": "arn:aws:s3:::tul-ccs/*"
+      # },
+      # {
+      # 	"Action": "s3:DeleteObject",
+      # 	"Effect": "Allow",
+      # 	"Resource": "arn:aws:s3:::tul-ccs/*"
+      # }
     ]
   })
 }

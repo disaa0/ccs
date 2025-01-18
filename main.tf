@@ -6,9 +6,9 @@ terraform {
     }
   }
   backend "s3" {
-    bucket         = "tul-ccs-terraform"
-    key            = "terraform.tfstate"
-    region         = "eu-north-1"
+    bucket = "tul-ccs-terraform"
+    key    = "terraform.tfstate"
+    region = "eu-north-1"
     # dynamodb_table = "terraform-lock" # Optional: Add a DynamoDB table for state locking
   }
 }
@@ -35,16 +35,18 @@ module "dynamodb" {
 # Lambda Module
 module "lambda" {
   source = "./aws/lambda"
-  # Vars
+
   cognito_user_pool_arn       = module.cognito.user_pool_arn
   cognito_user_pool_id        = module.cognito.user_pool_id
   cognito_user_pool_client_id = module.cognito.user_pool_client_id
   dynamodb_table_name         = module.dynamodb.user_permissions_table_name
   dynamodb_table_arn          = module.dynamodb.user_permissions_table_arn
+  s3_bucket_id                = module.s3.bucket_id
 
   depends_on = [
     module.cognito,
-    module.dynamodb
+    module.dynamodb,
+    module.s3
   ]
 }
 
@@ -52,10 +54,16 @@ module "lambda" {
 module "api_gateway" {
   source = "./aws/api_gateway"
 
-   auth_lambda_function_name  = module.lambda.auth_lambda_function_name
-   auth_lambda_function_invoke_arn  = module.lambda.auth_lambda_function_invoke_arn
+  lambda_add_user_name             = module.lambda.add_user_name
+  lambda_add_user_invoke_arn       = module.lambda.add_user_invoke_arn
+  lambda_file_validator_name       = module.lambda.file_validator_name
+  lambda_file_validator_invoke_arn = module.lambda.file_validator_invoke_arn
+  cognito_user_pool_client_id      = module.cognito.user_pool_client_id
+  cognito_user_pool_id             = module.cognito.user_pool_id
+  aws_region                       = "eu-north-1"
 
   depends_on = [
-    module.lambda
+    module.lambda,
+    module.cognito
   ]
 }

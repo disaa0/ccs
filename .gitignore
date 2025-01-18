@@ -1,5 +1,6 @@
 *.zip
 .terraform.lock.hcl
+.github
 
 # Local .terraform directories
 **/.terraform/*

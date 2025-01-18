@@ -1,50 +1,24 @@
 output "api_id" {
-  value       = aws_api_gateway_rest_api.auth_api.id
-  description = "The ID of the API Gateway REST API"
+  description = "The ID of the API Gateway API"
+  value       = aws_apigatewayv2_api.ccs.id
 }
 
-output "api_arn" {
-  value       = aws_api_gateway_rest_api.auth_api.arn
-  description = "The ARN of the API Gateway REST API"
+output "api_url" {
+  description = "The Invoke URL of the API Gateway API"
+  value       = aws_apigatewayv2_stage.dev_stage.invoke_url
 }
 
-output "api_execution_arn" {
-  value       = aws_api_gateway_rest_api.auth_api.execution_arn
-  description = "The execution ARN of the API Gateway REST API"
+output "lambda_add_user_integration_id" {
+  description = "The ID of the API Gateway integration for the Lambda function 'add_user'"
+  value       = aws_apigatewayv2_integration.lambda_add_user.id
 }
 
-output "api_endpoint" {
-  value       = "${aws_api_gateway_stage.auth_api.invoke_url}"
-  description = "The URL to invoke the API endpoint"
+output "lambda_file_validator_integration_id" {
+  description = "The ID of the API Gateway integration for the Lambda function 'file_validator'"
+  value       = aws_apigatewayv2_integration.lambda_file_validator.id
 }
 
-output "stage_name" {
-  value       = aws_api_gateway_stage.auth_api.stage_name
-  description = "The name of the API Gateway stage"
-}
-
-output "auth_resource_id" {
-  value       = aws_api_gateway_resource.auth.id
-  description = "The ID of the /auth resource"
-}
-
-output "login_resource_id" {
-  value       = aws_api_gateway_resource.login.id
-  description = "The ID of the /auth/login resource"
-}
-
-output "register_resource_id" {
-  value       = aws_api_gateway_resource.register.id
-  description = "The ID of the /auth/register resource"
-}
-
-# Optional but useful outputs for other integrations
-output "login_url" {
-  value       = "${aws_api_gateway_stage.auth_api.invoke_url}${aws_api_gateway_resource.login.path}"
-  description = "The full URL for the login endpoint"
-}
-
-output "register_url" {
-  value       = "${aws_api_gateway_stage.auth_api.invoke_url}${aws_api_gateway_resource.register.path}"
-  description = "The full URL for the register endpoint"
+output "dev_stage_id" {
+  description = "The ID of the dev stage in API Gateway"
+  value       = aws_apigatewayv2_stage.dev_stage.id
 }
