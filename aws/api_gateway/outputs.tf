@@ -8,11 +8,6 @@ output "api_url" {
   value       = aws_apigatewayv2_stage.dev_stage.invoke_url
 }
 
-output "lambda_add_user_integration_id" {
-  description = "The ID of the API Gateway integration for the Lambda function 'add_user'"
-  value       = aws_apigatewayv2_integration.lambda_add_user.id
-}
-
 output "lambda_file_validator_integration_id" {
   description = "The ID of the API Gateway integration for the Lambda function 'file_validator'"
   value       = aws_apigatewayv2_integration.lambda_file_validator.id

@@ -8,16 +8,23 @@ data "archive_file" "file_validator" {
 resource "aws_lambda_function" "file_validator" {
   filename         = data.archive_file.file_validator.output_path
   function_name    = "FileValidatorLambda"
-  role            = aws_iam_role.ccs_lambda.arn
-  handler         = "index.lambda_handler"
-  runtime         = "python3.9"
-  timeout         = 30
-  memory_size     = 256
+  role             = aws_iam_role.ccs_lambda.arn
+  handler          = "index.lambda_handler"
+  runtime          = "python3.9"
+  timeout          = 30
+  memory_size      = 256
   source_code_hash = data.archive_file.file_validator.output_base64sha256
+
+  lifecycle {
+    ignore_changes = [
+      last_modified,
+      qualified_arn
+    ]
+  }
 
   environment {
     variables = {
-
+      BUCKET_NAME = var.s3_bucket_id
     }
   }
 

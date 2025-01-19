@@ -27,3 +27,8 @@ variable "s3_bucket_id" {
   type        = string
   description = "The ID of the S3 file storage bucket"
 }
+
+variable "s3_bucket_arn" {
+  type        = string
+  description = "ARN of the S3 bucket for file storage"
+}
