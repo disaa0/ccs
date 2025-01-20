@@ -11,13 +11,45 @@ resource "aws_apigatewayv2_api" "ccs" {
   }
 }
 
-resource "aws_lambda_permission" "apigateway" {
-  statement_id  = "AllowAPIGatewayInvoke"
+resource "aws_lambda_permission" "apigateway_file_validator" {
+  statement_id  = "AllowAPIGatewayInvokeFileValidator"
   action        = "lambda:InvokeFunction"
   function_name = var.lambda_file_validator_name
   principal     = "apigateway.amazonaws.com"
 
   source_arn = "${aws_apigatewayv2_api.ccs.execution_arn}/*"
+}
+
+resource "aws_lambda_permission" "apigateway_file_versions" {
+  statement_id  = "AllowAPIGatewayInvokeFileVersions"
+  action        = "lambda:InvokeFunction"
+  function_name = var.lambda_file_versions_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ccs.execution_arn}/*"
+}
+
+resource "aws_lambda_permission" "apigateway_download_version" {
+  statement_id  = "AllowAPIGatewayInvokeDownloadVersion"
+  action        = "lambda:InvokeFunction"
+  function_name = var.lambda_download_version_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ccs.execution_arn}/*"
+}
+
+resource "aws_lambda_permission" "apigateway_restore_version" {
+  statement_id  = "AllowAPIGatewayInvokeRestoreVersion"
+  action        = "lambda:InvokeFunction"
+  function_name = var.lambda_restore_version_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ccs.execution_arn}/*"
+}
+
+resource "aws_lambda_permission" "apigateway_log_event" {
+  statement_id  = "AllowAPIGatewayInvokeLogEvent"
+  action        = "lambda:InvokeFunction"
+  function_name = var.lambda_log_event_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ccs.execution_arn}/*"
 }
 
 resource "aws_apigatewayv2_integration" "lambda_file_validator" {
@@ -26,11 +58,70 @@ resource "aws_apigatewayv2_integration" "lambda_file_validator" {
   integration_uri  = var.lambda_file_validator_invoke_arn
 }
 
-# Add CORS headers to all responses via response parameters
 resource "aws_apigatewayv2_route" "validate_zip" {
   api_id    = aws_apigatewayv2_api.ccs.id
   route_key = "POST /validate-zip"
   target    = "integrations/${aws_apigatewayv2_integration.lambda_file_validator.id}"
+
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_auth.id
+}
+
+resource "aws_apigatewayv2_integration" "lambda_file_versions" {
+  api_id           = aws_apigatewayv2_api.ccs.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = var.lambda_file_versions_invoke_arn
+}
+
+resource "aws_apigatewayv2_route" "file_versions" {
+  api_id    = aws_apigatewayv2_api.ccs.id
+  route_key = "GET /file-versions"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_file_versions.id}"
+
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_auth.id
+}
+
+resource "aws_apigatewayv2_integration" "lambda_download_version" {
+  api_id           = aws_apigatewayv2_api.ccs.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = var.lambda_download_version_invoke_arn
+}
+
+resource "aws_apigatewayv2_route" "download_version" {
+  api_id    = aws_apigatewayv2_api.ccs.id
+  route_key = "GET /download-version"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_download_version.id}"
+
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_auth.id
+}
+
+resource "aws_apigatewayv2_integration" "lambda_restore_version" {
+  api_id           = aws_apigatewayv2_api.ccs.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = var.lambda_restore_version_invoke_arn
+}
+
+resource "aws_apigatewayv2_route" "restore_version" {
+  api_id    = aws_apigatewayv2_api.ccs.id
+  route_key = "POST /restore-version"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_restore_version.id}"
+
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_auth.id
+}
+
+resource "aws_apigatewayv2_integration" "lambda_log_event" {
+  api_id           = aws_apigatewayv2_api.ccs.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = var.lambda_log_event_invoke_arn
+}
+
+resource "aws_apigatewayv2_route" "log_event" {
+  api_id    = aws_apigatewayv2_api.ccs.id
+  route_key = "POST /log-event"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_log_event.id}"
 
   authorization_type = "JWT"
   authorizer_id      = aws_apigatewayv2_authorizer.cognito_auth.id

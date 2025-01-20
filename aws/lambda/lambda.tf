@@ -27,7 +27,6 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_test" {
   role       = aws_iam_role.ccs_lambda.name
 }
 
-# S3 access policy for Lambda
 resource "aws_iam_role_policy" "lambda_s3_policy" {
   name = "CCSLambdaS3Policy"
   role = aws_iam_role.ccs_lambda.id
@@ -44,6 +43,18 @@ resource "aws_iam_role_policy" "lambda_s3_policy" {
         ]
         Resource = [
           "${var.s3_bucket_arn}/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:BatchWriteItem"
+        ]
+        Resource = [
+          "${var.dynamodb_table_arn}/*",
+          "${var.dynamodb_table_arn}"
+
         ]
       }
     ]
