@@ -2,7 +2,7 @@
 resource "aws_cognito_user_pool" "ccs_user_pool" {
   name                     = "ccs_user_pool"
   username_attributes      = ["email"]
-  auto_verified_attributes = ["email"]
+  auto_verified_attributes = [""]
   # alias_attributes         = ["email"]
 
   email_configuration {
@@ -17,7 +17,7 @@ resource "aws_cognito_user_pool" "ccs_user_pool" {
   }
 
   admin_create_user_config {
-    allow_admin_create_user_only = false #
+    allow_admin_create_user_only = false
   }
 
   verification_message_template {
@@ -140,6 +140,7 @@ resource "aws_iam_role_policy" "user_role_policy" {
           StringLike = {
             "s3:prefix" : [
               "public/$${cognito-identity.amazonaws.com:sub}/",
+              "public/$${cognito-identity.amazonaws.com:sub}/*",
             ]
           }
         }
